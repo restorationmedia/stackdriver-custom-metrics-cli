@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+var moment = require('moment');
+var winston = require('winston');
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)({
+        timestamp: function(){
+            return moment().format('YYYY-MM-DD HH:mm:ss');
+        },
+      formatter: function(options) {
+        // Return string will be passed to logger. 
+        return JSON.stringify({severity: options.level.toUpperCase(), message: options.message});
+      }
+    })
+  ]
+});
+var google = require('googleapis');
+var monitoring = google.monitoring('v3');
+var fs = require('fs');
+var Termoil = require('termoil');
+var stackc = new Termoil;
+stackc.name('Stack Driver Custom Metrics Manager');
+stackc.instructions('stackc [options]');
+stackc.addVersion(new Termoil.Version('0.0.1', true));
+stackc.addOption(new Termoil.Option(['-p', '-P', '--project'], 'project', new Termoil.Option.Type('value', true), 'Google Project'));
+
+var stackc_create = new Termoil;
+stackc_create.name('Stack Driver Custom Metrics Manager - Create Metric');
+stackc_create.instructions('stackc [options] create [options]');
+stackc_create.addVersion(new Termoil.Version('0.0.1', true));
+stackc_create.addOption(new Termoil.Option(['-b', '-B', '--body'], 'body', new Termoil.Option.Type('value', false), 'Custom Metric JSON Body', '{}', JSON.parse));
+
+stackc.addSubRoutine(new Termoil.SubRoutine(['create'], 'create', stackc_create));
+
+stackc_create.on('parsed', function(){
+    var body = this.get('body');
+    var project = this.get('project');
+    google.auth.getApplicationDefault(function(err, authClient){
+        if( err ){
+            logger.log('error', 'Failed to authenitcate with Google!');
+            return logger.log('error', err);
+        }
+        if( authClient.createScopedRequired && authClient.createScopedRequired()){
+            authClient = authClient.createScoped(['https://www.googleapis.com/auth/monitoring.write']);
+        }
+        var request = {
+            name: "projects/" + project,
+            resource: body,
+            auth: authClient
+        };
+        monitoring.projects.timeSeries.create(request, function(err, result){
+            if( err ){
+                logger.log('error', 'Failed to update timeSeries!');
+                return logger.log(err);
+            }
+
+            return logger.log('info', 'TimeSeries updated!');
+
+        });
+    });
+});
+
+stackc.parse(Termoil.Skip(process.argv, 2));

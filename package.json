@@ -1,0 +1,26 @@
+{
+  "name": "stackdriver-custom-metrics-cli",
+  "version": "0.0.3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "stackc": "./bin/stackc"
+  },
+  "keywords": [
+    "stackdriver",
+    "google",
+    "metrics"
+  ],
+  "author": "ericuldall",
+  "license": "ISC",
+  "dependencies": {
+    "googleapis": "^12.3.0",
+    "moment": "^2.14.1",
+    "termoil": "^1.1.5",
+    "winston": "^2.2.0"
+  },
+  "devDependencies": {},
+  "description": ""
+}
