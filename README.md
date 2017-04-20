@@ -62,6 +62,7 @@ stackc -p [PROJECT_NAME] read -f [FILTER STRING HERE] --start-time [START TIME] 
 The previous codeblock will read a metric of your specified filter between the time ranges set. If no start and end time are set it will default to the last 10 minutes.
 
 **Metrics List:** [https://cloud.google.com/monitoring/api/metrics]()
+
 **Filter Docs:** [https://cloud.google.com/monitoring/custom-metrics/reading-metrics#time_series_filters]()
 
 -------
