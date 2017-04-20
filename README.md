@@ -1,6 +1,6 @@
 # StackDriver Custom Metrics CLI
 
-This tool is designed to send custom metrics from any *nix system with an easy to use cli tool - `stackc`
+This tool is designed to send custom metrics from any \*nix system with an easy to use cli tool - `stackc`
 
 To get started just globally install this package:
 ```
@@ -8,6 +8,8 @@ npm install -g stackdriver-custom-metrics-cli
 ```
 
 **Note**: You MUST have `gcloud` cli installed and have a default service account activated for this software to work as is.
+
+# Create Metrics
 
 Here's how to insert your custom metrics...
 
@@ -51,7 +53,16 @@ Sample JSON Resource:
 }
 ```
 
-This cli currently only supports creating metrics timeSeries events, however support for other Google Monitoring api features may be added upon request.
+# Read Metrics
+
+```
+stackc -p [PROJECT_NAME] read -f [FILTER STRING HERE] --start-time [START TIME] --end-time [END TIME] 
+```
+
+The previous codeblock will read a metric of your specified filter between the time ranges set. If no start and end time are set it will default to the last 10 minutes.
+
+**Metrics List:** [https://cloud.google.com/monitoring/api/metrics]()
+**Filter Docs:** [https://cloud.google.com/monitoring/custom-metrics/reading-metrics#time_series_filters]()
 
 -------
 
