@@ -60,4 +60,44 @@ stackc_create.on('parsed', function(){
     });
 });
 
+var stackc_read = new Termoil;
+stackc_read.name('Stack Driver Custom Metrics Manager - Read Metric');
+stackc_read.instructions('stackc [options] read [options]');
+stackc_read.addVersion(new Termoil.Version('0.0.1', true));
+stackc_read.addOption(new Termoil.Option(['-f', '-F', '--filter'], 'filter', new Termoil.Option.Type('value', true), 'Metric Filter'));
+stackc_read.addOption(new Termoil.Option(['--start-time'], 'start_time', new Termoil.Option.Type('value'), 'Start Time', moment().format('YYYY-MM-DD HH:mm:ss'), function(val){return moment(val).format('YYYY-MM-DDTHH:mm:ss.SSSZ');}));
+stackc_read.addOption(new Termoil.Option(['--end-time'], 'end_time', new Termoil.Option.Type('value'), 'End Time', moment().format('YYYY-MM-DD HH:mm:ss'), function(val){return moment(val).format('YYYY-MM-DDTHH:mm:ss.SSSZ');}));
+
+stackc.addSubRoutine(new Termoil.SubRoutine(['read'], 'read', stackc_read));
+
+stackc_read.on('parsed', function(){
+    var filter = this.get('filter');
+    var startTime = this.get('start_time') || moment().subtract({minutes: 10}).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+    var endTime = this.get('end_time') || moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+    var project = this.get('project');
+    google.auth.getApplicationDefault(function(err, authClient){
+        if( err ){
+            logger.log('error', 'Failed to authenitcate with Google!');
+            return logger.log('error', err);
+        }
+        if( authClient.createScopedRequired && authClient.createScopedRequired()){
+            authClient = authClient.createScoped(['https://www.googleapis.com/auth/cloud-platform']);
+        }
+        var params = { 
+          name: "projects/" + project,
+          filter: filter,
+          "interval.startTime": startTime,
+          "interval.endTime": endTime,
+          auth: authClient
+        };
+        monitoring.projects.timeSeries.list(params, function(err, result){
+          if( err ){
+              logger.log('error', 'Failed to read timeSeries!');
+              return logger.log('error', JSON.stringify(err));
+          }
+          return process.stdout.write(JSON.stringify(result));
+        });
+    });
+});
+
 stackc.parse(Termoil.Skip(process.argv, 2));
