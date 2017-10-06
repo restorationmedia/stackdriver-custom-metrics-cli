@@ -97,7 +97,7 @@ stackc_read.on('parsed', function(){
         logger.log('debug', 'params', JSON.stringify(params));
         logger.log('debug', 'running', 'monitoring.projects.timeSeries.list(params, cb)');
         monitoring.projects.timeSeries.list(params, function(err, result){
-          logger.log('debug', 'api err', err);
+          logger.log('debug', 'api err', JSON.stringify(err));
           logger.log('debug', 'api result', JSON.stringify(result));
           if( err ){
               logger.log('error', 'Failed to read timeSeries!');
