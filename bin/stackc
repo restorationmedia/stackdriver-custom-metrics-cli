@@ -23,6 +23,7 @@ stackc.name('Stack Driver Custom Metrics Manager');
 stackc.instructions('stackc [options]');
 stackc.addVersion(new Termoil.Version('0.0.1', true));
 stackc.addOption(new Termoil.Option(['-p', '-P', '--project'], 'project', new Termoil.Option.Type('value', true), 'Google Project'));
+stackc.addOption(new Termoil.Option(['--debug'], 'debug', new Termoil.Option.Type('flag'), 'Print Debug Info'));
 
 var stackc_create = new Termoil;
 stackc_create.name('Stack Driver Custom Metrics Manager - Create Metric');
@@ -75,6 +76,9 @@ stackc_read.on('parsed', function(){
     var startTime = this.get('start_time') || moment().subtract({minutes: 10}).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
     var endTime = this.get('end_time') || moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
     var project = this.get('project');
+    if( this.get('debug') ){
+      logger.transports.console.level = 'debug';
+    }
     google.auth.getApplicationDefault(function(err, authClient){
         if( err ){
             logger.log('error', 'Failed to authenitcate with Google!');
@@ -90,7 +94,11 @@ stackc_read.on('parsed', function(){
           "interval.endTime": endTime,
           auth: authClient
         };
+        logger.log('debug', 'params', JSON.stringify(params));
+        logger.log('debug', 'running', 'monitoring.projects.timeSeries.list(params, cb)');
         monitoring.projects.timeSeries.list(params, function(err, result){
+          logger.log('debug', 'api err', err);
+          logger.log('debug', 'api result', JSON.stringify(result));
           if( err ){
               logger.log('error', 'Failed to read timeSeries!');
               return logger.log('error', JSON.stringify(err));
